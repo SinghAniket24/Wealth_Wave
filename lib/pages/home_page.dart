@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> loadStockData() async {
-    String jsonString = await rootBundle.loadString('assets/nifty_stock_filtered1.json');
+    String jsonString = await rootBundle.loadString('assets/nft.json');
     Map<String, dynamic> jsonResponse = json.decode(jsonString);
     List<dynamic> sheetData = jsonResponse['Sheet1'];
 

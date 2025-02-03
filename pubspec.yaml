@@ -81,6 +81,7 @@ flutter:
     - assets/nifty_i.json
     - assets/nifty_stock_filtered1.json
     - assets/nifty_stock_sheet_sort1.json
+    - assets/nft.json
 
   #   
 
