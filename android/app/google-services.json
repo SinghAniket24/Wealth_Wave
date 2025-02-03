@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "229045057222",
+    "project_id": "wealthwave-e7f6f",
+    "storage_bucket": "wealthwave-e7f6f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:229045057222:android:80863d2fba2218d68e49c7",
+        "android_client_info": {
+          "package_name": "com.example.stock_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT-dswUd-jaM1a_jxE6n1KfD3BSl3dLgY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

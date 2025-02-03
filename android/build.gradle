@@ -1,0 +1,23 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    
+
+rootProject.buildDir = "../build"
+subprocess {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprocess {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
+android {
+    defaultConfig {
+        minSdkVersion 21  // Minimum SDK version required
+    }
+}
+
