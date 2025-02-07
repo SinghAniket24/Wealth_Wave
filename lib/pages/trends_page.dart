@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:fl_chart/fl_chart.dart';
 
+// Global list to store the watchlist items
+List<Map<String, dynamic>> watchlist = [];
+
 class TrendsPage extends StatefulWidget {
   @override
   _TrendsPageState createState() => _TrendsPageState();
@@ -78,11 +81,13 @@ class _TrendsPageState extends State<TrendsPage> {
     });
   }
 
-  void _navigateToStockDetails(BuildContext context, Map<String, dynamic> stock) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => StockDetailPage(stock: stock)),
-    );
+  void _addToWatchlist(Map<String, dynamic> stock) {
+    setState(() {
+      // Add the stock to the global watchlist if not already present
+      if (!watchlist.any((item) => item["name"] == stock["name"])) {
+        watchlist.add(stock);
+      }
+    });
   }
 
   @override
@@ -133,8 +138,18 @@ class _TrendsPageState extends State<TrendsPage> {
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text(
                               "Close: ₹${stock["close"]}\nHigh: ₹${stock["high"]}\nLow: ₹${stock["low"]}"),
-                          trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                          onTap: () => _navigateToStockDetails(context, stock),
+                          trailing: IconButton(
+                            icon: Icon(Icons.add),
+                            onPressed: () => _addToWatchlist(stock),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StockDetailPage(stock: stock),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
