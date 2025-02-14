@@ -1,8 +1,10 @@
 {
     "cSpell.words": [
         "allprojects",
+        "predictionpage",
         "syncfusion",
         "Watchlist",
         "webp"
-    ]
+    ],
+    "cmake.sourceDirectory": "C:/Users/anike/OneDrive/Documents/mobile-dev/stock_app/linux"
 }

@@ -3,6 +3,8 @@ import 'pages/home_page.dart';
 import 'pages/watchlist_page.dart';
 import 'pages/trends_page.dart';
 import 'pages/news_page.dart';
+import 'splash_screen.dart';
+import 'pages/about_page.dart'; // Import the AboutPage
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -41,9 +43,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final List<Widget> _pages = [
-    HomePage(),
+    const HomePage(),
     const WatchlistPage(),
-    TrendsPage(),
+    const TrendsPage(),
     const NewsPage(),
   ];
 
@@ -51,8 +53,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 7, 28, 255),
-        title: const Text('Stock app'),
+        backgroundColor: const Color.fromARGB(255, 133, 139, 217),
+        title: const Text('Wealth Wave'),
       ),
       body: _pages[_selectedIndex],
       drawer: Drawer(
@@ -123,7 +125,15 @@ class _MyHomePageState extends State<MyHomePage> {
             _buildDrawerItem(Icons.settings, 'Settings'),
             _buildDrawerItem(Icons.logout, 'LogOut'),
             const Divider(),
-            _buildDrawerItem(Icons.help_outline, 'Help & Support'),
+            // _buildDrawerItem(Icons.help_outline, 'Help & Support'),
+            // Add the About section here
+            _buildDrawerItem(Icons.info, 'About', onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const AboutPage()),
+  );
+}),
+
           ],
         ),
       ),
@@ -147,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             BottomNavigationBarItem(
               label: 'Trends',
-              icon: Icon(Icons.trending_up),
+              icon: Icon(Icons.search),
             ),
             BottomNavigationBarItem(
               label: 'News',
@@ -161,12 +171,16 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget _buildDrawerItem(IconData icon, String title) {
+  Widget _buildDrawerItem(IconData icon, String title, {VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.black54),
       title: Text(title),
       onTap: () {
-        Navigator.pop(context);
+        if (onTap != null) {
+          onTap(); // Execute custom action (navigation to AboutPage)
+        } else {
+          Navigator.pop(context); // Close drawer for regular items
+        }
       },
     );
   }

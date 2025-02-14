@@ -1,6 +1,6 @@
 import yfinance as yf
-import flask
-from flask import jsonify
+import lib.flask as flask
+from lib.flask import jsonify
 from datetime import datetime
 
 # Flask app setup
