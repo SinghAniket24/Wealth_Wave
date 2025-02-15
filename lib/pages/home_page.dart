@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // for loading assets
 import 'package:fl_chart/fl_chart.dart';
 import 'package:marquee/marquee.dart';
+import 'dart:math' as Math; // Import for math functions
+
 
 
 
@@ -92,6 +94,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
  List<StockData> stockData = [];
  String selectedTimePeriod = '1 Year';
+ String marqueeText = ''; // Initialize marqueeText
 
 
  @override
@@ -109,8 +112,15 @@ class _HomePageState extends State<HomePage> {
 
    setState(() {
      stockData = sheetData.map((data) => StockData.fromJson(data)).toList();
+      populateMarqueeText();
    });
  }
+ void populateMarqueeText() {
+    setState(() {
+      marqueeText = stockData.map((data) =>
+      'Date: ${data.date}, Close: ${data.close.toStringAsFixed(2)}').join('   |   ');
+    });
+  }
 
 
  List<StockData> filterData() {
@@ -121,12 +131,14 @@ class _HomePageState extends State<HomePage> {
  }
 
 
+
  double calculateChange(List<StockData> data) {
    if (data.isEmpty) return 0.0;
    double startPrice = data.first.close;
    double endPrice = data.last.close;
    return ((endPrice - startPrice) / startPrice) * 100;
  }
+
 
 
 List<StockData> getTopCompaniesByVolume() {
@@ -161,14 +173,9 @@ List<StockData> getTopCompaniesByVolume() {
          ? const Center(child: CircularProgressIndicator())
          : ListView(
        padding: const EdgeInsets.all(16),
-       children: [
-
-
-
-
-         //StockTicker
-         StockTicker(stockData: stockData),
-         const SizedBox(height: 20),
+      children: [
+        StockTicker(stockData: filteredData), // Pass filteredData
+        const SizedBox(height: 20),
          Center(
   child: Align(
     alignment: Alignment.center,
@@ -914,152 +921,190 @@ class TopLosingCompaniesChart extends StatelessWidget {
 
 
 //Summary Status of all the companies ( Analysis of the Full Dataset)
+
+
 class SummaryStats extends StatelessWidget {
- final List<StockData> stockData;
+  final List<StockData> stockData;
 
+  const SummaryStats({Key? key, required this.stockData}) : super(key: key);
 
- const SummaryStats({super.key, required this.stockData});
+  double getAllTimeHigh() {
+    if (stockData.isEmpty) return 0.0;
+    return stockData.map((e) => e.close).reduce((a, b) => a > b ? a : b);
+  }
 
+  double getAllTimeLow() {
+    if (stockData.isEmpty) return 0.0;
+    return stockData.map((e) => e.close).reduce((a, b) => a < b ? a : b);
+  }
 
- double getAllTimeHigh() {
-   return stockData.map((e) => e.high).reduce((a, b) => a > b ? a : b);
- }
+  double getAveragePrice() {
+    if (stockData.isEmpty) return 0.0;
+    return stockData.map((e) => e.close).reduce((a, b) => a + b) / stockData.length;
+  }
 
+  double getPriceChangePercentage() {
+    if (stockData.length < 2) return 0.0;
+    double firstPrice = stockData.first.close;
+    double lastPrice = stockData.last.close;
+    return ((lastPrice - firstPrice) / firstPrice) * 100;
+  }
 
- double getAllTimeLow() {
-   return stockData.map((e) => e.low).reduce((a, b) => a < b ? a : b);
- }
+  // Calculate Volatility (Standard Deviation of Closing Prices)
+  double getVolatility() {
+    if (stockData.length < 2) return 0.0;
 
+    double avgPrice = getAveragePrice();
+    double sumOfSquaredDifferences = stockData.map((e) => (e.close - avgPrice) * (e.close - avgPrice)).reduce((a, b) => a + b);
+    double variance = sumOfSquaredDifferences / stockData.length;
+    return Math.sqrt(variance); // Need to import 'dart:math' for sqrt
+  }
 
- double getAveragePrice() {
-   return stockData.map((e) => e.close).reduce((a, b) => a + b) / stockData.length;
- }
+  // Calculate the Moving Average (e.g., 20-day moving average)
+  double getMovingAverage(int period) {
+    if (stockData.length < period) return 0.0;
 
+    double sum = 0;
+    for (int i = stockData.length - period; i < stockData.length; i++) {
+      sum += stockData[i].close;
+    }
+    return sum / period;
+  }
 
- double getPriceChangePercentage() {
-   if (stockData.isEmpty) return 0.0;
-   double startPrice = stockData.first.close;
-   double endPrice = stockData.last.close;
-   return ((endPrice - startPrice) / startPrice) * 100;
- }
-
-
- @override
- Widget build(BuildContext context) {
-
-
-   return Padding(
-
-
-     padding: const EdgeInsets.symmetric(vertical: 20),
-   child: Container(
-   decoration: BoxDecoration(
-   color: Colors.deepPurple[500], // Light Deep Purple for background
-   borderRadius: BorderRadius.circular(12), // Optional: Rounded corners
-   ),
-    // child: Card(
-    //   elevation: 6,
-     //  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-       child: Padding(
-         padding: const EdgeInsets.all(16),
-         child: Column(
-           crossAxisAlignment: CrossAxisAlignment.start,
-           children: [
-           const Text(
-           "Summary Stats",
-           style: TextStyle(
-             fontSize: 18,
-             fontWeight: FontWeight.bold,
-             color: Colors.white,
-           ),
-           ),
-             const SizedBox(height: 10),
-             Row(
-               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-               children: [
-                 StatCard(
-                   title: 'Highest Closing Price',
-                   value: '\$${getAllTimeHigh().toStringAsFixed(2)}',
-                 ),
-                 StatCard(
-                   title: 'Lowest Closing Price',
-                   value: '\$${getAllTimeLow().toStringAsFixed(2)}',
-                 ),
-               ],
-             ),
-             const SizedBox(height: 10),
-             Row(
-               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-               children: [
-                 StatCard(
-                   title: 'Average Closing Price',
-                   value: '\$${getAveragePrice().toStringAsFixed(2)}',
-                 ),
-                 StatCard(
-                   title: 'Price Change ',
-                   value: '${getPriceChangePercentage().toStringAsFixed(2)}%',
-                   valueColor: getPriceChangePercentage() >= 0 ? Colors.green : Colors.red,
-                 ),
-               ],
-             ),
-           ],
-         ),
-       ),
-     //),
-   ),
-   );
- }
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.deepPurple[500], // Light Deep Purple for background
+          borderRadius: BorderRadius.circular(12), // Optional: Rounded corners
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Summary Stats",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  StatCard(
+                    title: 'Highest Closing Price',
+                    value: 'Rs ${getAllTimeHigh().toStringAsFixed(2)}',
+                  ),
+                  StatCard(
+                    title: 'Lowest Closing Price',
+                    value: 'Rs ${getAllTimeLow().toStringAsFixed(2)}',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  StatCard(
+                    title: 'Average Closing Price',
+                    value: 'Rs ${getAveragePrice().toStringAsFixed(2)}',
+                  ),
+                  StatCard(
+                    title: 'Price Change ',
+                    value: '${getPriceChangePercentage().toStringAsFixed(2)}%',
+                    valueColor: getPriceChangePercentage() >= 0 ? Colors.green : Colors.red,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  StatCard(
+                    title: 'Volatility',
+                    value: getVolatility().toStringAsFixed(2),
+                  ),
+                  StatCard(
+                    title: '20-Day Moving Avg',
+                    value: 'Rs ${getMovingAverage(20).toStringAsFixed(2)}',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
-
 
 class StatCard extends StatelessWidget {
- final String title;
- final String value;
- final Color valueColor;
+  final String title;
+  final String value;
+  final Color valueColor;
 
+  const StatCard({
+    Key? key,
+    required this.title,
+    required this.value,
+    this.valueColor = Colors.white,
+  }) : super(key: key);
 
- const StatCard({
-   super.key,
-   required this.title,
-   required this.value,
-   this.valueColor = Colors.black,
- });
-
-
- @override
- Widget build(BuildContext context) {
-   return Column(
-     children: [
-       Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-       const SizedBox(height: 4),
-       Text(
-         value,
-         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: valueColor),
-       ),
-     ],
-   );
- }
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 14,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: valueColor,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+
 
 
 //Marquee
 class StockTicker extends StatelessWidget {
- final List<StockData> stockData;
+  final List<StockData> stockData;
 
+  const StockTicker({Key? key, required this.stockData}) : super(key: key);
 
- const StockTicker({super.key, required this.stockData});
+  @override
+  Widget build(BuildContext context) {
+    // Create a reversed copy of the stockData
+    List<StockData> reversedStockData = stockData.reversed.toList();
 
+    String marqueeText = reversedStockData
+        .take(10) // Display the last 10 closing prices (now first in reversed list)
+        .map((e) => '${e.date}: Rs ${e.close.toStringAsFixed(2)}')
+        .join("   |   "); // Join with separator
 
- @override
- Widget build(BuildContext context) {
-   return Container(
+    return Container(
       height: 50,
       color: Colors.blueAccent,
       child: Marquee(
-        text: stockData
-            .take(5) // Display the last 5 closing prices
-            .map((e) => '${e.date}: Rs ${e.close.toStringAsFixed(2)}')
-            .join("   |   "), // Join with separator
+        text: marqueeText,
         style: const TextStyle(fontSize: 16, color: Colors.white),
         scrollAxis: Axis.horizontal,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1068,8 +1113,7 @@ class StockTicker extends StatelessWidget {
         startPadding: 10.0,
       ),
     );
- }
+  }
 }
-
 
 
